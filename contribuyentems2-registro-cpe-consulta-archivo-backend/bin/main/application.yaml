@@ -1,0 +1,65 @@
+server:
+  port: 7002
+
+management:
+  server:
+    port: 17002
+  endpoints:
+    web:
+      base-path: /
+      path-mapping:
+        health: "healthcheck"
+
+# -------------------------------------------
+# Informix BD
+# -------------------------------------------
+dataSources:
+  - uniqueResourceName: cpe
+    jndiName: jdbc/cpe
+    url: jdbc:informix-sqli://150.100.21.128:50064/cpe:INFORMIXSERVER=d01_cpe;user=solweb;password=Solweb
+    driverClassName: com.informix.jdbc.IfxDriver
+    minPoolSize: 10
+    maxPoolSize: 10
+    maxIdleTime: 60
+    borrowConnectionTimeout: 30
+    maintenanceInterval: 360
+    timeoutHealthCheckInMilliseconds: 2000
+    healthCheck: true
+
+#Habilita la anotacion @Configuration, importante para los configmap por microservicio
+
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 30MB
+  jpa:
+    open-in-view: false
+
+
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
+    org.springframework.data.repository.config.RepositoryConfigurationDelegate: WARN
+    org.apache.kafka.clients: INFO
+    org.apache.kafka.clients.consumer: WARN
+    org.apache.kafka.clients.producer: WARN
+    org.springframework.transaction: TRACE
+    org.springframework.transaction.interceptor.TransactionInterceptor: WARN
+    org.springframework.kafka.transaction: DEBUG
+    org.springframework.kafka.support.LoggingProducerListener: WARN
+    com.mchange.v2.c3p0.SQLWarnings: ERROR
+    org.mongodb.driver.protocol.command: WARN
+    org.mongodb.driver: WARN
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: DEBUG
+    org.hibernate.type.descriptor.sql: DEBUG
+    org.hibernate.type.descriptor.sql.spi: WARN
+    pe.gob.sunat.tecnologiams2.arquitectura.framework.microservices: DEBUG
+    io.lettuce.core.RedisClient: DEBUG
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
+    reactor.netty.http.client: DEBUG

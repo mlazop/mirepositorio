@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+       xmlns:weld="http://jboss.org/schema/weld/beans" bean-discovery-mode="all">
+    <weld:scan>
+        <weld:include name="pe.gob.sunat.**"/>
+    </weld:scan>
+</beans>
