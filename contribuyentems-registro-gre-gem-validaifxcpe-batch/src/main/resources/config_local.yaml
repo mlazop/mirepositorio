@@ -1,0 +1,98 @@
+server:
+  applicationConnectors:
+  - type: http
+    port: 7470
+  adminConnectors:
+  - type: http
+    port: 17470
+  requestLog:
+    appenders: [ ]
+serviceName: contribuyentems-registro-gre-gem-validaifxcpe-batch
+# -------------------------------------------
+# Informix BD
+# -------------------------------------------
+dataSources:
+  - uniqueResourceName: cpe
+    jndiName: jdbc/cpe
+    url: jdbc:informix-sqli://150.100.21.128:50064/cpe:INFORMIXSERVER=d01_cpe;user=solweb;password=Solweb
+    driverClassName: com.informix.jdbc.IfxDriver
+    minPoolSize: 10
+    maxPoolSize: 10
+    maxIdleTime: 60
+    borrowConnectionTimeout: 30
+    maintenanceInterval: 360
+    timeoutHealthCheckInMilliseconds: 2000
+    healthCheck: true
+# -------------------------------------------
+# KAFKA
+# -------------------------------------------
+kafkaConsumerValidaIfxCpe:
+  topic:  topic-contribuyentems-registro-gre-gem-validaifxcpe
+  topicR: topic-contribuyentems-registro-gre-gem-validaifxcpe-R
+  bootstrap_server: srvcpeseskafka01.sunat.peru:9092,srvcpeseskafka02.sunat.peru:9092,srvcpeseskafka03.sunat.peru:9092
+  consumerGroup: group-topic-contribuyentems-registro-gre-gem-validaifxcpe
+  kafkaHealthCheck: true
+  timeInterval: 30
+  maxRetryTime: 150
+kafkaProducerEnvioAceptado:
+  topic: topic-contribuyentems-registro-gre-gem-envioaceptado
+  bootstrap_server: srvcpeseskafka01.sunat.peru:9092,srvcpeseskafka02.sunat.peru:9092,srvcpeseskafka03.sunat.peru:9092
+  id: topic-contribuyentems-registro-gre-gem-envioaceptado
+kafkaProducerEnvioRechazado:
+  topic: topic-contribuyentems-registro-gre-gem-enviorechazado
+  bootstrap_server: srvcpeseskafka01.sunat.peru:9092,srvcpeseskafka02.sunat.peru:9092,srvcpeseskafka03.sunat.peru:9092
+  id: topic-contribuyentems-registro-gre-gem-enviorechazado
+kafkaProducerEnvioIfxMasivo:
+  topic: topic-contribuyentems-registro-gre-gem-validaifxmasivo
+  bootstrap_server: srvcpeseskafka01.sunat.peru:9092,srvcpeseskafka02.sunat.peru:9092,srvcpeseskafka03.sunat.peru:9092
+  id: topic-contribuyentems-registro-gre-gem-validaifxmasivo
+kafkaProducerEnvioIfxRecauda:
+  topic: topic-contribuyentems-registro-gre-gem-validaifxrecauda
+  bootstrap_server: srvcpeseskafka01.sunat.peru:9092,srvcpeseskafka02.sunat.peru:9092,srvcpeseskafka03.sunat.peru:9092
+  id: topic-contribuyentems-registro-gre-gem-validaifxrecauda
+kafkaProducerEnvioAduanas:
+  topic: topic-contribuyentems-registro-gre-gem-validaaduanas
+  bootstrap_server: srvcpeseskafka01.sunat.peru:9092,srvcpeseskafka02.sunat.peru:9092,srvcpeseskafka03.sunat.peru:9092
+  id: topic-contribuyentems-registro-gre-gem-validaaduanas
+# -------------------------------------------
+# Configuraciones para este microservicio
+# -------------------------------------------
+logging:
+  level: INFO
+  loggers:
+    io.dropwizard: INFO
+    org.eclipse: INFO
+    org.hibernate: INFO
+    org.apache.camel: INFO
+    com.mchange: INFO
+    com.netflix: INFO
+    org.jboss.weld.Version: INFO
+    org.jboss.weld: INFO
+    io.dropwizard.jersey.DropwizardResourceConfig: INFO
+    io.dropwizard.server.ServerFactory: INFO
+    org.glassfish.jersey.server.ServerRuntime: FATAL
+    org.jboss.weld.environment.servlet.logging: INFO
+    com.atomikos.jdbc.AtomikosConnectionProxy: ERROR
+    com.circulosiete.metrics.health.hystrix: INFO
+    org.apache.kafka: INFO
+    org.mongodb: INFO
+    pe.gob.sunat: DEBUG
+    pe.gob.sunat.tecnologiams.arquitectura.framework.kafka.conf: ERROR
+    pe.gob.sunat.tecnologiams.arquitectura.framework.microservices.util.UtilLog: DEBUG
+  appenders:
+    - type: file
+      currentLogFilename: /logs//apps//contribuyentems-registro-gre-gem-validaifxcpe-batch//contribuyentems-registro-gre-gem-validaifxcpe-batch.log
+      archivedLogFilenamePattern: /logs//apps//contribuyentems-registro-gre-gem-validaifxcpe-batch//contribuyentems-registro-gre-gem-validaifxcpe-batch-%d-%i.log.gz
+      maxFileSize: 500MB
+      archivedFileCount: 20
+      timeZone: GMT-05:00
+    - type: console
+      timeZone: EST
+    - type: logstash-tcp
+      host: logstash-logforwarder
+      port: 9210
+      timeZone: EST
+      includeCallerData: true
+      includeMdc: true
+      includeContext: true
+      includeCallerInfo: true

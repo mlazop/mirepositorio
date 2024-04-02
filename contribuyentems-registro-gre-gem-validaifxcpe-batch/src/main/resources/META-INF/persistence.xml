@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence
+             http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd"
+	version="2.1">
+
+	<persistence-unit name="cpe" transaction-type="RESOURCE_LOCAL">
+		<non-jta-data-source>jdbc/cpe</non-jta-data-source>
+		<class>pe.gob.sunat.contribuyentems.registro.gre.emision.domain.T4241cabcpe</class>
+		<class>pe.gob.sunat.contribuyentems.registro.gre.emision.domain.T4241cabcpePK</class>
+		<exclude-unlisted-classes>false</exclude-unlisted-classes>
+	</persistence-unit>
+</persistence>
