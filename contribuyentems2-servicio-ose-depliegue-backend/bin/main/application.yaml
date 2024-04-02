@@ -1,0 +1,50 @@
+server:
+  port: 7002
+
+management:
+  server:
+    port: 17002
+  endpoints:
+    web:
+      base-path: /
+      path-mapping:
+        health: "healthcheck"
+
+
+#Habilita la anotacion @Configuration, importante para los configmap por microservicio
+
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 30MB
+  jpa:
+    open-in-view: false
+
+
+
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: TRACE
+    org.springframework.data.repository.config.RepositoryConfigurationDelegate: WARN
+    org.apache.kafka.clients: INFO
+    org.apache.kafka.clients.consumer: WARN
+    org.apache.kafka.clients.producer: WARN
+    org.springframework.transaction: TRACE
+    org.springframework.transaction.interceptor.TransactionInterceptor: WARN
+    org.springframework.kafka.transaction: DEBUG
+    org.springframework.kafka.support.LoggingProducerListener: WARN
+    com.mchange.v2.c3p0.SQLWarnings: ERROR
+    org.mongodb.driver.protocol.command: WARN
+    org.mongodb.driver: WARN
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: DEBUG
+    org.hibernate.type.descriptor.sql: DEBUG
+    org.hibernate.type.descriptor.sql.spi: WARN
+    pe.gob.sunat.tecnologiams2.arquitectura.framework.microservices: DEBUG
+    io.lettuce.core.RedisClient: DEBUG
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
+    reactor.netty.http.client: DEBUG
