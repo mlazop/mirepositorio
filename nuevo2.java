@@ -1,4 +1,4 @@
-package pe.gob.sunat.contribuyentems2.servicio.cpe.consulta.nfs.backend.ws.rest;
+package pe.gob.sunat.contribuyentems2.registro.cpe.consulta.nfs.backend.ws.rest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -20,26 +20,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import pe.gob.sunat.contribuyentems2.servicio.cpe.consulta.nfs.backend.domain.Archivo;
-import pe.gob.sunat.contribuyentems2.servicio.cpe.consulta.nfs.backend.domain.Respuesta;
+import pe.gob.sunat.contribuyentems2.registro.cpe.consulta.nfs.backend.domain.Archivo;
+import pe.gob.sunat.contribuyentems2.registro.cpe.consulta.nfs.backend.domain.Respuesta;
 
 
 
 @RestController
 @RequestMapping(value = "/contribuyente")
 public class NFSRestService {
-	@GetMapping(value = "/message")
-	public ResponseEntity showMessage() {
-		return ResponseEntity.ok().body("HELLO DEMO DESPLIEGUE...");
-	}
-
-	@GetMapping(value = "/message/{mimensaje}")
-	public ResponseEntity showMessage(@PathVariable("mimensaje") String mimensaje ) {
-		return ResponseEntity.ok().body("Hola Mundo, este es mi mensaje : " + mimensaje );
-	}
 	
-	
-    
     @PostMapping("/ose/lectura/nfs")
     public ResponseEntity<?> convierte(@RequestBody Map<String, Object> requestBody) {
     	String nomArchivo;
@@ -48,17 +37,17 @@ public class NFSRestService {
     	    nomArchivo = (String) requestBody.get("nomArchivo");
     	    rutaArchivo = (String) requestBody.get("rutaArchivo");
     	} else {
-    		return ResponseEntity.badRequest().body("falta parametro nomArchivo/rutaArchivo");
+    		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Se presentaron errores de validación que impidieron completar el Request, 0001- Parametros nomArchivo/rutaArchivo deben estar presentes");
     	}
     	if (nomArchivo == null || rutaArchivo == null || nomArchivo.isEmpty() || rutaArchivo.isEmpty()) {
-                return ResponseEntity.badRequest().body("El nombre del archivo o la ruta del archivo no pueden ser nulos o vacios");       
+                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Se presentaron errores de validación que impidieron completar el Request, 0002- Parametros nomArchivo/rutaArchivo no pueden ser nullos o vacios");       
         }
                        
-    	Path fileAbsolutePath = Paths.get(rutaArchivo, nomArchivo);
-        File file = fileAbsolutePath.toFile();
+    	Path rutaCompleta = Paths.get(rutaArchivo, nomArchivo);
+        File file = rutaCompleta.toFile();
         
         if (!file.exists()) {
-            return ResponseEntity.badRequest().body(nomArchivo + " no se encuentra en la ruta especificada");
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Se presentaron errores de validación que impidieron completar el Request, 0003- No se encontro el archivo en la ruta especificada");
         }
     	    	
         try (FileInputStream fileInputStream = new FileInputStream(file);
@@ -76,64 +65,128 @@ public class NFSRestService {
             return ResponseEntity.ok(new Respuesta(base64Encoded, nomArchivo));
             
            } catch (IOException e) {
-               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al procesar el archivo");
+               return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Se presento una condicion inesperada que impidio completar el Request.");
            }
        } 
-    
+   
     
     
     @PostMapping("/ose/lectura/nfs/multiple")
-    
     public ResponseEntity<?> procesarArchivos(@RequestBody Map<String, List<Map<String, String>>> requestBody) {
-    	List<Respuesta> respuestas = new ArrayList<>();
+    	boolean unaRespuesta=false;
+		List<Respuesta> respuestas = new ArrayList<>();
     	try {
             List<Map<String, String>> lstArchivos = requestBody.get("lstArchivos");
             if (lstArchivos == null || lstArchivos.isEmpty()) {
-                return ResponseEntity.badRequest().body("La lista de archivos es incorrecta");
+                return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Se presentaron errores de validación que impidieron completar el Request, 0001- Lista de archivos incorrecta.");
             }
-            
             String nomArchivo;
             String rutaArchivo;
-                        
+
             for (Map<String, String> archivo : lstArchivos) {
-            	String mensajeError="";
             	if (archivo.containsKey("nomArchivo") && archivo.containsKey("rutaArchivo")) {
             	    nomArchivo = (String) archivo.get("nomArchivo");
             	    rutaArchivo = (String) archivo.get("rutaArchivo");
             	} else {
-            	    return ResponseEntity.badRequest().body("falta parametro nomArchivo/rutaArchivo");
+            		return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Se presentaron errores de validación que impidieron completar el Request, 0002- Parametros nomArchivo/rutaArchivo deben estar presentes");
             	}
-            		            	            	                
-                if (nomArchivo == null || rutaArchivo == null || nomArchivo.isEmpty() || rutaArchivo.isEmpty()) {
-                    return ResponseEntity.badRequest().body("El nombre del archivo o la ruta del archivo no pueden ser nulos o vacíos");
+            	
+                if ((nomArchivo == null || rutaArchivo == null || nomArchivo.isEmpty() || rutaArchivo.isEmpty())) {
+                	return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Se presentaron errores de validación que impidieron completar el Request, 0003- Parametros nomArchivo/rutaArchivo no pueden ser nullos o vacios");    
                 }
-              
-                Path fileAbsolutePath = Paths.get(rutaArchivo, nomArchivo);
-                File file = fileAbsolutePath.toFile();
-                
-                if (!file.exists()) {
-                    return ResponseEntity.badRequest().body(nomArchivo + " no se encuentra en la ruta especificada");
-                }
-                FileInputStream fileInputStream = new FileInputStream(file);
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                
-                byte[] buffer = new byte[1024];
-                int length;
-                while ((length = fileInputStream.read(buffer)) != -1) {
-                    byteArrayOutputStream.write(buffer, 0, length);
-                }
-                
-                byte[] bytes = byteArrayOutputStream.toByteArray();
-                String base64Encoded = Base64.getEncoder().encodeToString(bytes);
-                
-                respuestas.add(new Respuesta(base64Encoded, nomArchivo));
-                
+                else {
+                	Path rutaCompleta = Paths.get(rutaArchivo, nomArchivo);
+                	File file = rutaCompleta.toFile();
+                	if (file.exists()) {
+                		unaRespuesta=true;
+                		FileInputStream fileInputStream = new FileInputStream(file);
+                		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                		byte[] buffer = new byte[1024];
+                		int length;
+                		while ((length = fileInputStream.read(buffer)) != -1) {
+                			byteArrayOutputStream.write(buffer, 0, length);
+                		}
+                		byte[] bytes = byteArrayOutputStream.toByteArray();
+                		String base64Encoded = Base64.getEncoder().encodeToString(bytes);
+                		respuestas.add(new Respuesta(base64Encoded, nomArchivo));
+                		} 
+                	}
             }
-
+            if(!unaRespuesta) {
+         	   return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Se presentaron errores de validación que impidieron completar el Request, 0004- No se encontro el archivo en la ruta especificada");  
+            }
             return ResponseEntity.ok(respuestas);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno al procesar la solicitud");
-        }
+          } catch (Exception e) {
+        	  	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Se presento una condicion inesperada que impidio completar el Request");
+          }
     }
 
+    
+    
 }
+
+
+
+
+package pe.gob.sunat.contribuyentems2.registro.cpe.consulta.nfs.backend.domain;
+
+public class Archivo {
+	public String nomArchivo;
+	public String rutaArchivo;
+	
+	public Archivo(String nomArchivo, String rutaArchivo) {
+		this.nomArchivo=nomArchivo;
+		this.rutaArchivo=rutaArchivo;
+	}
+	
+	public String getnomArchivo() {
+        return nomArchivo;
+    }
+
+    public void setnomArchivo(String nomArchivo) {
+        this.nomArchivo = nomArchivo;
+    }
+
+    public String getrutaArchivo() {
+        return rutaArchivo;
+    }
+
+    public void setrutaArchivo(String rutaArchivo) {
+        this.rutaArchivo = rutaArchivo;
+    }
+    
+}
+
+
+package pe.gob.sunat.contribuyentems2.registro.cpe.consulta.nfs.backend.domain;
+
+public class Respuesta {
+	
+	private String archivoB64;
+	private String nomArchivo;
+	
+	public Respuesta(String archivoB64, String nomArchivo) {
+		this.archivoB64 = archivoB64;
+		this.nomArchivo = nomArchivo;
+        
+	}
+	
+	public String getNomArchivo() {
+		return nomArchivo;
+	}
+	
+	public String setNomArchivo(String nomArchivo) {
+		return this.nomArchivo=nomArchivo;
+	}
+
+	public String getArchivoB64() {
+		return archivoB64;
+	}
+	
+	public String setArchivoB64(String archivoB64) {
+		return this.archivoB64=archivoB64;
+	}
+	
+	
+}
+
